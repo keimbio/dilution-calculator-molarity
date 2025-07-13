@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dilution Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calculator {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .equation {
+            text-align: center;
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #4a5568;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .form-group:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group.active {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input.calculated {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            font-weight: bold;
+        }
+
+        .unit-select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .unit-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+            color: white;
+        }
+
+        .btn-reset:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(237, 137, 54, 0.3);
+        }
+
+        .result {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .error {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .calculator {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1>Dilution Calculator</h1>
+            <p>Calculate concentrations and volumes for solution dilutions</p>
+        </div>
+
+        <div class="equation">
+            C₁V₁ = C₂V₂
+        </div>
+
+        <form id="dilutionForm">
+            <div class="form-grid">
+                <div class="form-group" data-field="c1">
+                    <label>Initial Concentration (C₁)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="c1" step="any" placeholder="Enter concentration">
+                        <select class="unit-select" id="c1Unit">
+                            <option value="fM">fM</option>
+                            <option value="pM">pM</option>
+                            <option value="nM">nM</option>
+                            <option value="μM">μM</option>
+                            <option value="mM" selected>mM</option>
+                            <option value="M">M</option>
+                            <option value="%">%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" data-field="v1">
+                    <label>Initial Volume (V₁)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="v1" step="any" placeholder="Enter volume">
+                        <select class="unit-select" id="v1Unit">
+                            <option value="fL">fL</option>
+                            <option value="pL">pL</option>
+                            <option value="nL">nL</option>
+                            <option value="μL">μL</option>
+                            <option value="mL" selected>mL</option>
+                            <option value="L">L</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" data-field="c2">
+                    <label>Final Concentration (C₂)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="c2" step="any" placeholder="Enter concentration">
+                        <select class="unit-select" id="c2Unit">
+                            <option value="fM">fM</option>
+                            <option value="pM">pM</option>
+                            <option value="nM">nM</option>
+                            <option value="μM">μM</option>
+                            <option value="mM" selected>mM</option>
+                            <option value="M">M</option>
+                            <option value="%">%</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" data-field="v2">
+                    <label>Final Volume (V₂)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="v2" step="any" placeholder="Enter volume">
+                        <select class="unit-select" id="v2Unit">
+                            <option value="fL">fL</option>
+                            <option value="pL">pL</option>
+                            <option value="nL">nL</option>
+                            <option value="μL">μL</option>
+                            <option value="mL" selected>mL</option>
+                            <option value="L">L</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button type="button" class="btn btn-calculate" onclick="calculate()">Calculate</button>
+                <button type="button" class="btn btn-reset" onclick="resetForm()">Reset</button>
+            </div>
+        </form>
+
+        <div id="result" class="result"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        // Conversion factors to base units (M for concentration, L for volume)
+        const concentrationFactors = {
+            'fM': 1e-15,
+            'pM': 1e-12,
+            'nM': 1e-9,
+            'μM': 1e-6,
+            'mM': 1e-3,
+            'M': 1,
+            '%': 0.01 // Assuming w/v percentage
+        };
+
+        const volumeFactors = {
+            'fL': 1e-15,
+            'pL': 1e-12,
+            'nL': 1e-9,
+            'μL': 1e-6,
+            'mL': 1e-3,
+            'L': 1
+        };
+
+        function convertToBase(value, unit, factors) {
+            return value * factors[unit];
+        }
+
+        function convertFromBase(value, unit, factors) {
+            return value / factors[unit];
+        }
+
+        function clearMessages() {
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function showResult(message, calculatedField) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = message;
+            resultDiv.classList.add('show');
+            
+            // Highlight the calculated field
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('active');
+            });
+            if (calculatedField) {
+                document.querySelector(`[data-field="${calculatedField}"]`).classList.add('active');
+                const input = document.getElementById(calculatedField);
+                input.classList.add('calculated');
+                setTimeout(() => input.classList.remove('calculated'), 3000);
+            }
+        }
+
+        function calculate() {
+            clearMessages();
+            
+            const c1 = parseFloat(document.getElementById('c1').value);
+            const v1 = parseFloat(document.getElementById('v1').value);
+            const c2 = parseFloat(document.getElementById('c2').value);
+            const v2 = parseFloat(document.getElementById('v2').value);
+            
+            const c1Unit = document.getElementById('c1Unit').value;
+            const v1Unit = document.getElementById('v1Unit').value;
+            const c2Unit = document.getElementById('c2Unit').value;
+            const v2Unit = document.getElementById('v2Unit').value;
+            
+            // Count how many fields are filled
+            const filledFields = [c1, v1, c2, v2].filter(val => !isNaN(val) && val !== '').length;
+            
+            if (filledFields !== 3) {
+                showError('Please fill exactly 3 fields. The 4th field will be calculated.');
+                return;
+            }
+            
+            // Convert all values to base units
+            const c1Base = !isNaN(c1) ? convertToBase(c1, c1Unit, concentrationFactors) : null;
+            const v1Base = !isNaN(v1) ? convertToBase(v1, v1Unit, volumeFactors) : null;
+            const c2Base = !isNaN(c2) ? convertToBase(c2, c2Unit, concentrationFactors) : null;
+            const v2Base = !isNaN(v2) ? convertToBase(v2, v2Unit, volumeFactors) : null;
+            
+            let result, calculatedField, resultMessage;
+            
+            // Calculate missing value using C1V1 = C2V2
+            if (isNaN(c1)) {
+                // Calculate C1
+                if (v1Base === 0) {
+                    showError('Volume 1 cannot be zero when calculating Concentration 1.');
+                    return;
+                }
+                const c1Calculated = (c2Base * v2Base) / v1Base;
+                result = convertFromBase(c1Calculated, c1Unit, concentrationFactors);
+                document.getElementById('c1').value = result.toFixed(6);
+                calculatedField = 'c1';
+                resultMessage = `<strong>Calculated Initial Concentration (C₁):</strong><br>${result.toFixed(6)} ${c1Unit}`;
+            } else if (isNaN(v1)) {
+                // Calculate V1
+                if (c1Base === 0) {
+                    showError('Concentration 1 cannot be zero when calculating Volume 1.');
+                    return;
+                }
+                const v1Calculated = (c2Base * v2Base) / c1Base;
+                result = convertFromBase(v1Calculated, v1Unit, volumeFactors);
+                document.getElementById('v1').value = result.toFixed(6);
+                calculatedField = 'v1';
+                resultMessage = `<strong>Calculated Initial Volume (V₁):</strong><br>${result.toFixed(6)} ${v1Unit}`;
+            } else if (isNaN(c2)) {
+                // Calculate C2
+                if (v2Base === 0) {
+                    showError('Volume 2 cannot be zero when calculating Concentration 2.');
+                    return;
+                }
+                const c2Calculated = (c1Base * v1Base) / v2Base;
+                result = convertFromBase(c2Calculated, c2Unit, concentrationFactors);
+                document.getElementById('c2').value = result.toFixed(6);
+                calculatedField = 'c2';
+                resultMessage = `<strong>Calculated Final Concentration (C₂):</strong><br>${result.toFixed(6)} ${c2Unit}`;
+            } else if (isNaN(v2)) {
+                // Calculate V2
+                if (c2Base === 0) {
+                    showError('Concentration 2 cannot be zero when calculating Volume 2.');
+                    return;
+                }
+                const v2Calculated = (c1Base * v1Base) / c2Base;
+                result = convertFromBase(v2Calculated, v2Unit, volumeFactors);
+                document.getElementById('v2').value = result.toFixed(6);
+                calculatedField = 'v2';
+                resultMessage = `<strong>Calculated Final Volume (V₂):</strong><br>${result.toFixed(6)} ${v2Unit}`;
+            }
+            
+            if (result !== undefined) {
+                // Add dilution ratio information
+                const dilutionRatio = (c1Base / c2Base);
+                resultMessage += `<br><br><strong>Dilution Ratio:</strong> 1:${dilutionRatio.toFixed(2)}`;
+                
+                if (calculatedField === 'v2') {
+                    const volumeToAdd = result - convertFromBase(v1Base, v2Unit, volumeFactors);
+                    if (volumeToAdd > 0) {
+                        resultMessage += `<br><strong>Volume to add:</strong> ${volumeToAdd.toFixed(6)} ${v2Unit}`;
+                    }
+                }
+                
+                showResult(resultMessage, calculatedField);
+            }
+        }
+        
+        function resetForm() {
+            document.getElementById('dilutionForm').reset();
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('active');
+            });
+            clearMessages();
+            
+            // Reset to default units
+            document.getElementById('c1Unit').value = 'mM';
+            document.getElementById('v1Unit').value = 'mL';
+            document.getElementById('c2Unit').value = 'mM';
+            document.getElementById('v2Unit').value = 'mL';
+        }
+        
+        // Add input validation
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.value < 0) {
+                    this.value = '';
+                    showError('Values cannot be negative.');
+                } else {
+                    clearMessages();
+                }
+            });
+        });
+        
+        // Allow Enter key to calculate
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+    </script>
+</body>
+</html>
